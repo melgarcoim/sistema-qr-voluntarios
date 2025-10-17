@@ -3,11 +3,11 @@ import {
   createVoluntario,
   updateVoluntario,
   deleteVoluntario,
-  getVoluntarioById // ✅ Importar función para obtener voluntario por ID
+  getVoluntarioById
 } from '../models/voluntariosModel.js';
 
-import { QRCodesModel } from '../models/qrcodesModel.js'; // ✅ Importar modelo de QR
-import { logAuditoria } from '../utils/auditoria.js'; // ✅ Importar función de auditoría
+import { QRCodesModel } from '../models/qrcodesModel.js';
+import { logAuditoria } from '../utils/auditoria.js';
 
 // 📋 GET - Listar todos los voluntarios
 export const listarVoluntarios = async (req, res) => {
@@ -23,22 +23,42 @@ export const listarVoluntarios = async (req, res) => {
 // 🆕 POST - Crear voluntario con QR automático
 export const crearVoluntario = async (req, res) => {
   try {
-    const { nombre, apellido, email, telefono, ciudad, state_id } = req.body;
+    const {
+      ci,
+      first_name,
+      last_name,
+      email,
+      phone,
+      photo_url,
+      year_joined,
+      state_id,
+      emergency_contact_name,
+      emergency_contact_phone
+    } = req.body;
 
-    if (!nombre || !apellido) {
-      return res.status(400).json({ error: 'Nombre y apellido son requeridos' });
+    if (!first_name || !last_name || !state_id) {
+      return res.status(400).json({ error: 'Nombre, apellido y estado son requeridos' });
     }
 
-    const nuevo = await createVoluntario(nombre, apellido, email, telefono, ciudad, state_id);
+    const nuevo = await createVoluntario(
+      ci,
+      first_name,
+      last_name,
+      email,
+      phone,
+      photo_url,
+      year_joined,
+      state_id,
+      emergency_contact_name,
+      emergency_contact_phone
+    );
+
     const voluntario = nuevo;
 
     const qr = await QRCodesModel.create(voluntario.id);
-    console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
-
     const token = qr.token;
     const scan_url = `${process.env.FRONTEND_URL || ''}/scan/${token}`;
 
-    // 📝 Registrar auditoría
     await logAuditoria({
       action: 'CREATE',
       entity: 'voluntarios',
@@ -65,10 +85,21 @@ export const crearVoluntario = async (req, res) => {
 export const actualizarVoluntario = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nombre, apellido, email, telefono, ciudad, state_id } = req.body;
+    const {
+      ci,
+      first_name,
+      last_name,
+      email,
+      phone,
+      photo_url,
+      year_joined,
+      state_id,
+      emergency_contact_name,
+      emergency_contact_phone
+    } = req.body;
 
-    if (!nombre || !apellido) {
-      return res.status(400).json({ error: 'Nombre y apellido son requeridos' });
+    if (!first_name || !last_name || !state_id) {
+      return res.status(400).json({ error: 'Nombre, apellido y estado son requeridos' });
     }
 
     const before_data = await getVoluntarioById(id);
@@ -76,9 +107,20 @@ export const actualizarVoluntario = async (req, res) => {
       return res.status(404).json({ error: 'Voluntario no encontrado' });
     }
 
-    const after_data = await updateVoluntario(id, nombre, apellido, email, telefono, ciudad, state_id);
+    const after_data = await updateVoluntario(
+      id,
+      ci,
+      first_name,
+      last_name,
+      email,
+      phone,
+      photo_url,
+      year_joined,
+      state_id,
+      emergency_contact_name,
+      emergency_contact_phone
+    );
 
-    // 📝 Registrar auditoría
     await logAuditoria({
       action: 'UPDATE',
       entity: 'voluntarios',
@@ -107,7 +149,6 @@ export const eliminarVoluntario = async (req, res) => {
 
     const eliminado = await deleteVoluntario(id);
 
-    // 📝 Registrar auditoría
     await logAuditoria({
       action: 'DELETE',
       entity: 'voluntarios',
@@ -122,6 +163,7 @@ export const eliminarVoluntario = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar voluntario', details: error.message });
   }
 };
+
 
 
 

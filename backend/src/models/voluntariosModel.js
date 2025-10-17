@@ -5,9 +5,19 @@ export const getAllVoluntarios = async () => {
   try {
     const result = await pool.query(`
       SELECT 
-        id, 
-        first_name AS nombre, 
-        last_name AS apellido
+        id,
+        ci,
+        first_name,
+        last_name,
+        email,
+        phone,
+        photo_url,
+        year_joined,
+        state_id,
+        emergency_contact_name,
+        emergency_contact_phone,
+        created_at,
+        updated_at
       FROM voluntarios
       ORDER BY first_name ASC
       LIMIT 10
@@ -25,16 +35,26 @@ export const getVoluntarioById = async (id) => {
     const result = await pool.query(
       `
       SELECT 
-        id, 
-        first_name AS nombre, 
-        last_name AS apellido
+        id,
+        ci,
+        first_name,
+        last_name,
+        email,
+        phone,
+        photo_url,
+        year_joined,
+        state_id,
+        emergency_contact_name,
+        emergency_contact_phone,
+        created_at,
+        updated_at
       FROM voluntarios
       WHERE id = $1
       LIMIT 1
       `,
       [id]
     );
-    return result.rows[0]; // Devuelve un objeto o undefined si no existe
+    return result.rows[0];
   } catch (error) {
     console.error('❌ Error en getVoluntarioById:', error);
     throw error;
@@ -42,18 +62,46 @@ export const getVoluntarioById = async (id) => {
 };
 
 // ➕ Crear voluntario
-export const createVoluntario = async (nombre, apellido) => {
+export const createVoluntario = async (
+  ci,
+  first_name,
+  last_name,
+  email,
+  phone,
+  photo_url,
+  year_joined,
+  state_id,
+  emergency_contact_name,
+  emergency_contact_phone
+) => {
   try {
     const result = await pool.query(
       `
-      INSERT INTO voluntarios (first_name, last_name, state_id)
-      VALUES ($1, $2, $3)
-      RETURNING id, first_name AS nombre, last_name AS apellido
+      INSERT INTO voluntarios (
+        ci,
+        first_name,
+        last_name,
+        email,
+        phone,
+        photo_url,
+        year_joined,
+        state_id,
+        emergency_contact_name,
+        emergency_contact_phone
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      RETURNING *
       `,
       [
-        nombre,
-        apellido,
-        '7ba8a40b-9f19-436d-82fd-8fa5dbc0938b' // state_id "activo"
+        ci,
+        first_name,
+        last_name,
+        email,
+        phone,
+        photo_url,
+        year_joined,
+        state_id,
+        emergency_contact_name,
+        emergency_contact_phone
       ]
     );
     return result.rows[0];
@@ -64,16 +112,51 @@ export const createVoluntario = async (nombre, apellido) => {
 };
 
 // 🔄 Actualizar voluntario
-export const updateVoluntario = async (id, nombre, apellido) => {
+export const updateVoluntario = async (
+  id,
+  ci,
+  first_name,
+  last_name,
+  email,
+  phone,
+  photo_url,
+  year_joined,
+  state_id,
+  emergency_contact_name,
+  emergency_contact_phone
+) => {
   try {
     const result = await pool.query(
       `
       UPDATE voluntarios
-      SET first_name = $1, last_name = $2
-      WHERE id = $3
-      RETURNING id, first_name AS nombre, last_name AS apellido
+      SET
+        ci = $1,
+        first_name = $2,
+        last_name = $3,
+        email = $4,
+        phone = $5,
+        photo_url = $6,
+        year_joined = $7,
+        state_id = $8,
+        emergency_contact_name = $9,
+        emergency_contact_phone = $10,
+        updated_at = NOW()
+      WHERE id = $11
+      RETURNING *
       `,
-      [nombre, apellido, id]
+      [
+        ci,
+        first_name,
+        last_name,
+        email,
+        phone,
+        photo_url,
+        year_joined,
+        state_id,
+        emergency_contact_name,
+        emergency_contact_phone,
+        id
+      ]
     );
     return result.rows[0];
   } catch (error) {
@@ -89,7 +172,7 @@ export const deleteVoluntario = async (id) => {
       `
       DELETE FROM voluntarios
       WHERE id = $1
-      RETURNING id, first_name AS nombre, last_name AS apellido
+      RETURNING *
       `,
       [id]
     );
@@ -99,5 +182,6 @@ export const deleteVoluntario = async (id) => {
     throw error;
   }
 };
+
 
 

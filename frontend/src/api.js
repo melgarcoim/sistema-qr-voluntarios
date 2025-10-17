@@ -2,8 +2,12 @@
 import axios from "axios";
 import { logout } from "@/utils/auth";
 
+// 🌐 Base URL configurable
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+
+// 🧠 Instancia central de Axios
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -33,5 +37,16 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+// 🛠 Función auxiliar para diagnóstico
+export async function pingBackend() {
+  try {
+    const res = await fetch(`${API_URL}/ping`);
+    const data = await res.text();
+    console.log("✅ Backend respondió:", data);
+  } catch (err) {
+    console.error("❌ Error al conectar con backend:", err);
+  }
+}
 
 export default api;

@@ -20,6 +20,11 @@ app.get('/', (req, res) => {
   res.send('Servidor backend funcionando 🚀');
 });
 
+// ✅ Endpoint de conexión para frontend
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 // Rutas
 app.use('/api/voluntarios', voluntariosRoutes);
 app.use('/api/actividades', actividadRoutes);
@@ -32,6 +37,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor backend funcionando en puerto ${PORT}`);
 });
-
-
-
